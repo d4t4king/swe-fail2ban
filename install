@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+#####################################################################################################
+#
+#   				(c) Charlie Heselton 2017
+#
+#####################################################################################################
+#
+# COPYRIGHT NOTICE                                                        
+# Copyright (for this script) 2017 Charlie Heselton
+# All Rights Reserved.                     
+# EMail: dataking@gmail.com	
+# URL  : http://www.dataking.us
+#
+# Lizenez/License: GPL, see license
+#
+#####################################################################################################
+#
+#
+# fail2ban-Homepage: http://fail2ban.org
+#
+
+. /var/smoothwall/ethernet/settings
+
+MOD_HOME="/var/smoothwall/mods-available"
+F2B_HOME="${MOD_HOME}/fail2ban"
+
+if [ -x "${F2B_HOME}/bin/uninstall_fail2ban" ]
+then
+	echo -e "previous version detected"
+	echo -e "uninstalling previous version\t\t\n"
+	${F2B_HOME}/bin/uninstall_fail2ban >/dev/null 2>&1
+	echo -e "Done"
+fi
+
+echo -e "installing files\t\t\t\n"
+tar xf files.tar.gz -C / >/dev/null 2>&1 
+
+NET="${GREEN_NETADDRESS}/24"
+sed -i -e s/HOMENET/${NET}/ ${F2B_HOME}/config.default 
+HTTPPORTS=$(grep "Listen" /etc/httpd/conf/httpd.conf | cut -d" " -f2 | cut -d: -f2 | sed ':a;N;$!ba;s/\n/ /g')
+sed -i -e s/DUMMY_HTTP/$HTTPPORTS/g ${F2B_HOME}/config.default
+
+SSHPORTS=$(grep "Port" /usr/etc/sshd_config | grep -v "Gate" | cut -d" " -f2)
+sed -i -e s/DUMMY_SSH/$SSHPORTS/g ${F2B_HOME}/config.default
+
+#sed -i -e '/...pluto../ r status.header' /home/httpd/cgi-bin/status.cgi
+
+ln -s ${F2B_HOME}/bin/rc.fail2ban /etc/rc.d/rc.fail2ban
+
+echo -e "Done"
+
+echo -e "creating startup entries\t\t\n"
+cat <<END >>/etc/ssh/sshd_config
+#Added for fail2ban
+Banner /var/smoothwall/mod-available/fail2ban/banner 
+#End fail2ban
+END
+smoothcom restartssh
+
+cat <<END >>${F2B_HOME}/etc/rc.d/rc.local
+#Added for fail2ban
+${F2B_HOME}/etc/rc.d/rc.fail2ban force_start
+#End fail2ban
+END
+echo -e "Done"
+
+rm -rf `pwd`
+
+exit 0
+
+
+
+

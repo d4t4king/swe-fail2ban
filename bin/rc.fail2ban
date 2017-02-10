@@ -1,0 +1,215 @@
+#!/bin/bash
+#
+# fail2ban
+#
+# description: if many unsuccessfull login attempts from some ip address \
+#              during a short period happen, this address is banned \
+#              by the firewall
+#
+# Author: Andrey G. Grozin
+# 
+# $Revision: 1.2 $
+
+# Check that config is done
+[ -f "/var/ipcop/fail2ban/config" ] || exit 0
+
+FAIL2BAN="/usr/bin/fail2ban"
+PIDFILE="/var/run/fail2ban.pid"
+CONF="/var/ipcop/fail2ban/config"
+
+RED="\\033[0;31m"
+DGREE="\\033[0;32m"
+DYELL="\\033[0;33m"
+DBLUE="\\033[0;34m"
+DCYAN="\\033[0;35m"
+LBLUE="\\033[0;36m"
+RESET="\\033[0;37m"
+WHITE="\\033[1;38m"
+LRED="\\033[1;31m"
+LGREE="\\033[1;32m"
+LYELL="\\033[1;33m"
+LCYAN="\\033[1;36m"
+LVIO="\\033[1;35m"
+CLEAR="\\033[0m"
+
+RETVAL=0
+
+start() {
+    if [ -f "${PIDFILE}" ]; then
+	echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${LRED}fail2ban seems to be running.${CLEAR}\nif not, use \n\t\t$0 force_start\nto run fail2ban"	
+	exit -1
+    fi
+    echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${CLEAR}Starting fail2ban: \c"
+    $FAIL2BAN -c $CONF > /dev/null
+    RETVAL=$?
+    if [ $RETVAL -ne 0 ]
+    then
+	echo -e "${LRED}failed${CLEAR}"
+    else
+	echo -e "${LGREE}done${CLEAR}"
+	sleep 5 && chmod 644 /var/run/fail2ban.pid &
+    fi
+}
+
+force_start() {
+    if [ -f "${PIDFILE}" ]; then
+	rm -f $PIDFILE
+	killall -9 fail2ban >/dev/null 2>&1
+    fi
+    echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${CLEAR}Starting fail2ban: \c"
+    $FAIL2BAN -c $CONF > /dev/null
+    RETVAL=$?
+    if [ $RETVAL -ne 0 ]
+    then
+	echo -e "${LRED}failed${CLEAR}"
+    else
+	echo -e "${LGREE}done${CLEAR}"
+	sleep 5 && chmod 644 /var/run/fail2ban.pid &
+    fi
+}
+
+stop() {
+    if [ -f "${PIDFILE}" ]; then
+	echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${CLEAR}Stopping fail2ban: \c"
+	"${FAIL2BAN}" -k > /dev/null
+    	RETVAL=$?
+	if [ $RETVAL -ne 0 ]
+    	then
+		echo -e "${LRED}failed${CLEAR}"
+    	else
+		echo -e "${LGREE}done${CLEAR}"
+    	fi
+    fi
+}
+
+force_stop() {
+	PID=`ps -A|grep fail2ban|grep -v "rc.fail2ban"|awk '{print $1}'`
+	if [ "$PID" != "" ]
+	then
+		echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${CLEAR}Stopping fail2ban: \c"
+		kill -9 $PID > /dev/null
+	    	RETVAL=$?
+		if [ $RETVAL -ne 0 ]
+    		then
+			echo -e "${LRED}failed${CLEAR}"
+	    	else
+			echo -e "${LGREE}done${CLEAR}"
+	    	fi
+		if [ -f "${PIDFILE}" ]; then
+			rm ${PIDFILE} >/dev/null 2>&1
+		fi
+	fi
+}
+
+clean() {
+	if [ -f "${PIDFILE}" ]; then
+		echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${CLEAR}removing pidfile: \c"
+		rm ${PIDFILE} >/dev/null 2>&1
+	    	RETVAL=$?
+		if [ $RETVAL -ne 0 ]
+    		then
+			echo -e "${LRED}failed${CLEAR}"
+	    	else
+			echo -e "${LGREE}done${CLEAR}"
+	    	fi
+	fi
+}
+
+status(){
+	PID=`ps -A|grep fail2ban|grep -v "rc.fail2ban"|awk '{print $1}'`
+	if [ "x$PID" != "x" ]
+	then
+		echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${LGREE}fail2ban is running with pid:${CLEAR} ${LYELL}$PID${CLEAR}"
+	else
+		echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${LRED}fail2ban is not running${CLEAR}"
+	fi
+}
+
+restart() {
+    stop
+    clean
+    start
+}
+
+boot_on() {
+	STAT=`grep "rc.fail2ban" /etc/rc.d/rc.local|cut -b1`
+	if [ "$STAT" != "#" ]
+	then
+		echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${CLEAR}fail2ban is allready enabled on boot !"
+		exit -1
+	else
+		echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${CLEAR}enabling fail2ban on boot: \c"
+		sed -i -e 's/\#\/etc\/rc\.d\/rc\.fail2ban\ force_start/\/etc\/rc\.d\/rc\.fail2ban\ force_start/g' /etc/rc.d/rc.local
+	    	RETVAL=$?
+		if [ $RETVAL -ne 0 ]
+    		then
+			echo -e "${LRED}failed${CLEAR}"
+	    	else
+			echo -e "${LGREE}done${CLEAR}"
+	    	fi
+	fi
+}
+
+boot_off() {
+		STAT=`grep "rc.fail2ban" /etc/rc.d/rc.local|cut -b1`
+		if [ "$STAT" != "#" ]
+		then
+			echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${CLEAR}disabling fail2ban on boot: \c"
+			sed -i -e 's/\/etc\/rc\.d\/rc\.fail2ban\ force_start/\#\/etc\/rc\.d\/rc\.fail2ban\ force_start/g' /etc/rc.d/rc.local
+		    	RETVAL=$?
+			if [ $RETVAL -ne 0 ]
+    			then
+				echo -e "${LRED}failed${CLEAR}"
+		    	else
+				echo -e "${LGREE}done${CLEAR}"
+	    		fi
+		else
+			echo -e "${LRED}-=-${LGREE}=-=${LRED}-=>  ${CLEAR}fail2ban is allready disabled on boot !"
+			exit -1
+		fi
+}
+
+# See how we were called.
+case "$1" in
+  start)
+        start
+        ;;
+  force_start)
+        force_start
+        ;;
+  stop)
+        stop
+        ;;
+  force_stop)
+        force_stop
+        ;;
+  reload)
+        restart
+        ;;
+  restart)
+        restart
+        ;;
+  boot_on)
+	 boot_on
+	 ;;
+  boot_off)
+	 boot_off
+	 ;;
+  status)
+        status
+        ;;
+  clean)
+        clean
+        ;;
+  condrestart)
+        if [ -f "${PIDFILE}" ]; then
+            restart
+        fi
+        ;;
+  *)
+        echo -e "Usage:   ${WHITE}$0${CLEAR}\t{${LGREE}start${CLEAR}|${LRED}stop${CLEAR}|${LYELL}status${CLEAR}|${LVIO}boot_on${CLEAR}|${LVIO}boot_off${CLEAR}|\n\t\t\t\t ${LCYAN}restart${CLEAR}|${LCYAN}condrestart${CLEAR}|${LCYAN}force_stop${CLEAR}|${LCYAN}force_start${CLEAR}|${LCYAN}clean${CLEAR}}"
+        exit 1
+        ;;
+esac
+
+exit $RETVAL
