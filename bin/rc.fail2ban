@@ -9,13 +9,18 @@
 # Author: Andrey G. Grozin
 # 
 # $Revision: 1.2 $
+#
+# Modified for use with Smoothwall Express by Charlie Heselton, 
+#	a.k.a. dataking,d4t4king, <dataking [at] gmail [dot] com>
+#
 
+F2B_HOME="/var/smoothwall/mods-available/fail2ban"
 # Check that config is done
-[ -f "/var/ipcop/fail2ban/config" ] || exit 0
+[ -f "${F2B_HOME}/config" ] || exit 0
 
-FAIL2BAN="/usr/bin/fail2ban"
+FAIL2BAN="${F2B_HOME}/usr/bin/fail2ban"
 PIDFILE="/var/run/fail2ban.pid"
-CONF="/var/ipcop/fail2ban/config"
+CONF="${F2B_HOME}/config"
 
 RED="\\033[0;31m"
 DGREE="\\033[0;32m"

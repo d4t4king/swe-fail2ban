@@ -15,18 +15,19 @@
 # License: CreativeCommons, some right restricted ( http://creativecommons.org/licenses/by-nd/2.5/ )
 #
 #####################################################################################################
-#
-# 				    Im Script muss nichts veraendert werden
-#				Nothings got to be changed in this script to work
-#
+#	Modified for use with Smoothwall Express by Charlie Heselton a.k.a. dataking,d4t4king
 #####################################################################################################
-#
 
+#
+# define global paths
+#
+MOD_HOME="/var/smoothwall/mods-available"
+F2B_HOME="${MOD_HOME}/fail2ban"
 #
 # define configuration-files
 #
-CONFIG="/var/ipcop/fail2ban/config"
-DEFAULT="/var/ipcop/fail2ban/config.default"
+CONFIG="${F2B_HOME}/config"
+DEFAULT="${F2B_HOME}/config.default"
 #
 # define variables
 #
@@ -56,12 +57,12 @@ then
 	echo -e "No default configuration-file found, exiting..."
 	exit -1
 fi
-if [  ! -x /usr/bin/fail2ban ]
+if [  ! -x "${F2B_HOME}/usr/bin/fail2ban-client" ]
 then 
-	echo -e "fail2ban not found, exiting..."
+	echo -e "fail2ban executable not found, exiting..."
 	exit -1
 fi
-if [  ! -x /etc/rc.d/rc.fail2ban ]
+if [  ! -x "${F2B_HOME}/etc/rc.d/rc.fail2ban" ]
 then 
 	echo -e "rc.fail2ban not found, exiting..."
 	exit -1
@@ -182,15 +183,15 @@ done
 echo -e "${CLEAR}"
 if [ $BOOT == "y" ]
 then
-	/etc/rc.d/rc.fail2ban boot_on >/dev/null 2>&1
+	${F2B_HOME}/etc/rc.d/rc.fail2ban boot_on >/dev/null 2>&1
 else
-	/etc/rc.d/rc.fail2ban boot_off >/dev/null 2>&1
+	${F2B_HOME}/etc/rc.d/rc.fail2ban boot_off >/dev/null 2>&1
 fi
 #
 # restart fail2ban
 #
-/etc/rc.d/rc.fail2ban stop >/dev/null 2>&1
-/etc/rc.d/rc.fail2ban start
+${F2B_HOME}/etc/rc.d/rc.fail2ban stop >/dev/null 2>&1
+${F2B_HOME}/etc/rc.d/rc.fail2ban start
 #
 # finished
 #
