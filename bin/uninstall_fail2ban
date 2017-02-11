@@ -1,32 +1,16 @@
 #!/bin/bash
-echo -e "uninstalling fail2ban...............\c"
 
-/etc/rc.d/rc.fail2ban stop >/dev/null 2>&1
+###############################################################################
 
-rm -rf /usr/bin/fail2ban >/dev/null 2>&1
-rm -rf /usr/lib/fail2ban >/dev/null 2>&1
-rm -rf /var/log/fail2ban.log >/dev/null 2>&1
-rm -rf /etc/rc.d/rc.fail2ban >/dev/null 2>&1
-rm -rf /var/ipcop/fail2ban >/dev/null 2>&1
+echo "disabling fail2ban................\t\t\n"
+rm -f /var/smoothwall/mods/fail2ban
 
-cd /
+echo "If you would like to re-enabled fail2ban at some point in the future, "
+echo "simply run the following command:"
+echo "\tpushd /var/smoothwall/mods; ln -snf ../mods-available/fail2ban fail2ban"
+echo
+echo
+echo "If you would like to completely remove fail2ban, run this command:"
+echo "\trm -rf /var/smoothwall/mods-available/fail2ban"
+echo
 
-/bin/cat /etc/rc.d/rc.local | sed -e '/Added for fail2ban/,/End fail2ban/d'>rc.local
-/bin/cp rc.local /etc/rc.d/rc.local
-/bin/rm rc.local
-
-/bin/cat /etc/ssh/sshd_config | sed -e '/Added for fail2ban/,/End fail2ban/d'>sshd_config
-/bin/cp sshd_config /etc/ssh/sshd_config
-/bin/rm sshd_config
-
-/bin/cat /home/httpd/cgi-bin/status.cgi | sed -e '/Added for fail2ban/,/End fail2ban/d'>status.cgi
-/bin/cp status.cgi /home/httpd/cgi-bin/status.cgi
-/bin/rm status.cgi
-
-restartssh >/dev/null 2>&1
-
-rm -f /usr/local/bin/config_fail2ban
-rm -f /usr/local/bin/uninstall_fail2ban
-
-echo -e "finished"
-exit 0
