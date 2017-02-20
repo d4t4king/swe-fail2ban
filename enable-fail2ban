@@ -8,11 +8,11 @@ use Term::ANSIColor;
 use Cwd;
 use Data::Dumper;
 
-use lib "/usr/smoothwall/lib";
-use header;
+use lib "/usr/lib/smoothwall";
+use header qw( :standard );
 
-my $mod_home = "/var/smoothwall/mods";
-my $moda_home = "/var/smoothwall/mods-available";
+my $mods_home = "/var/smoothwall/mods";
+my $modsa_home = "/var/smoothwall/mods-available";
 my $mod_name = "fail2ban";
 my %mask2cidr = (
 	'255.255.255.252'	=>	'/30',
@@ -23,7 +23,7 @@ my %mask2cidr = (
 	'255.255.255.128'	=>	'/25',
 	'255.255.255.0'		=>	'/24',
 	'255.255.0.0'		=>	'/16',
-	'255.0.0.0'			=>	'/8',
+	'255.0.0.0'		=>	'/8',
 );
 my (%ethernet_settings);
 &readhash("/var/smoothwall/ethernet/settings", \%ethernet_settings);
@@ -31,16 +31,16 @@ my (%ethernet_settings);
 my $cwd = getcwd();
 given ($cwd) {
 	when ('/root/swe-fail2ban') {
-		print colored("Looks like you're in the dev directory.  Would you like to install this mod to your smoothie?", "bold cyan");
+		print colored("Looks like you're in the dev directory.  Would you like to install this mod to your smoothie?\n", "bold cyan");
 		my $ans = readline();
 		chomp($ans);
 		if ($ans =~ /^[Yy](?:es)?/) {
-			system("/bin/mkdir -p $moda_home") unless ( -d $moda_home );
-			system("/bin/mkdir -p $moda_home/$mod_name") unless ( -d "$moda_home/$mod_name");
-			system("/bin/cp -rf * $moda_home/$mod_name/");
-			chdir("$moda_home/$mod_name");
+			system("/bin/mkdir -p $modsa_home") unless ( -d $modsa_home );
+			system("/bin/mkdir -p $modsa_home/$mod_name") unless ( -d "$modsa_home/$mod_name");
+			system("/bin/cp -rf * $modsa_home/$mod_name/");
+			chdir("$modsa_home/$mod_name");
 			my @newlines;
-			open CONFIN, "<etc/fail2ban/fail2ban.conf" or die colored("There was a problem opening fail2ban.conf: $!", "bold red");
+			open CONFIN, "<etc/fail2ban/jail.conf" or die colored("There was a problem opening jail.conf: $!", "bold red");
 			while (my $line = <CONFIN>) {
 				chomp($line);
 				if ($line =~ /^ignoreip/) {
@@ -48,14 +48,14 @@ given ($cwd) {
 				}
 				push @newlines, $line;
 			}
-			close CONFIN or die colored("There was a problem closing fail2ban.conf: $!", "bold red");
-			open CONFOUT, ">/tmp/tmp.tmp.conf" or die colored("Couldn't open output tmp file: $!", "bold red");
+			close CONFIN or die colored("There was a problem closing jail.conf: $!", "bold red");
+			open CONFOUT, ">/tmp/fail2ban.tmp.conf" or die colored("Couldn't open output tmp file: $!", "bold red");
 			foreach my $line ( @newlines ) {
 				print CONFOUT $line."\n";
 			}
 			close CONFOUT or die colored("There was a problem closing output tmp file: $!", "bold red");
-			system("/bin/cp -f /tmp/tmp.conf $mods_home/$mod_name/etc/fail2ban/fail2ban.conf");
-			chdir("$mod_home");
+			system("/bin/cp -f /tmp/fail2ban.tmp.conf $modsa_home/$mod_name/etc/fail2ban/jail.conf");
+			chdir("$mods_home");
 			system("/bin/ln -snf ../mods-available/fail2ban fail2ban");
 		} else {
 			print colored("Quitting.\n", "bold red");
@@ -63,16 +63,16 @@ given ($cwd) {
 		}
 	}
 	when ('/tmp/fail2ban') {
-		print colored("Looks like you're in the tmp directory.  Would you like to install this mod to your smoothie?", "bold cyan");
+		print colored("Looks like you're in the tmp directory.  Would you like to install this mod to your smoothie?\n", "bold cyan");
 		my $ans = readline();
 		chomp($ans);
 		if ($ans =~ /^[Yy](?:es)?/) {
-			system("/bin/mkdir -p $moda_home") unless ( -d $moda_home );
-			system("/bin/mkdir -p $moda_home/$mod_name") unless ( -d "$moda_home/$mod_name");
-			system("/bin/cp -rf * $moda_home/$mod_name/");
-			chdir("$moda_home/$mod_name");
+			system("/bin/mkdir -p $modsa_home") unless ( -d $modsa_home );
+			system("/bin/mkdir -p $modsa_home/$mod_name") unless ( -d "$modsa_home/$mod_name");
+			system("/bin/cp -rf * $modsa_home/$mod_name/");
+			chdir("$modsa_home/$mod_name");
 			my @newlines;
-			open CONFIN, "<etc/fail2ban/fail2ban.conf" or die colored("There was a problem opening fail2ban.conf: $!", "bold red");
+			open CONFIN, "<etc/fail2ban/jail.conf" or die colored("There was a problem opening jail.conf: $!", "bold red");
 			while (my $line = <CONFIN>) {
 				chomp($line);
 				if ($line =~ /^ignoreip/) {
@@ -80,27 +80,27 @@ given ($cwd) {
 				}
 				push @newlines, $line;
 			}
-			close CONFIN or die colored("There was a problem closing fail2ban.conf: $!", "bold red");
-			open CONFOUT, ">/tmp/tmp.tmp.conf" or die colored("Couldn't open output tmp file: $!", "bold red");
+			close CONFIN or die colored("There was a problem closing jail.conf: $!", "bold red");
+			open CONFOUT, ">/tmp/fail2ban.tmp.conf" or die colored("Couldn't open output tmp file: $!", "bold red");
 			foreach my $line ( @newlines ) {
 				print CONFOUT $line."\n";
 			}
 			close CONFOUT or die colored("There was a problem closing output tmp file: $!", "bold red");
-			system("/bin/cp -f /tmp/tmp.conf $mods_home/$mod_name/etc/fail2ban/fail2ban.conf");
-			chdir("$mod_home");
+			system("/bin/cp -f /tmp/fail2ban.tmp.conf $modsa_home/$mod_name/etc/fail2ban/jail.conf");
+			chdir("$mods_home");
 			system("/bin/ln -snf ../mods-available/fail2ban fail2ban");
 		} else {
 			print colored("Quitting.\n", "bold red");
 			exit 0;
 		}
 	}
-	when ("$moda_dir/$mod_name") {
-		print colored("Looks like you're already in the mod home directory.  Less to do!   \nWould you like to install this mod to your smoothie?", "bold cyan");
+	when ("$modsa_home/$mod_name") {
+		print colored("Looks like you're already in the mod home directory.  Less to do!   \nWould you like to install this mod to your smoothie?\n", "bold cyan");
 		my $ans = readline();
 		chomp($ans);
 		if ($ans =~ /^[Yy](?:es)?/) {
 			my @newlines;
-			open CONFIN, "<etc/fail2ban/fail2ban.conf" or die colored("There was a problem opening fail2ban.conf: $!", "bold red");
+			open CONFIN, "<etc/fail2ban/jail.conf" or die colored("There was a problem opening jail.conf: $!", "bold red");
 			while (my $line = <CONFIN>) {
 				chomp($line);
 				if ($line =~ /^ignoreip/) {
@@ -108,14 +108,14 @@ given ($cwd) {
 				}
 				push @newlines, $line;
 			}
-			close CONFIN or die colored("There was a problem closing fail2ban.conf: $!", "bold red");
-			open CONFOUT, ">/tmp/tmp.tmp.conf" or die colored("Couldn't open output tmp file: $!", "bold red");
+			close CONFIN or die colored("There was a problem closing jail.conf: $!", "bold red");
+			open CONFOUT, ">/tmp/fail2ban.tmp.conf" or die colored("Couldn't open output tmp file: $!", "bold red");
 			foreach my $line ( @newlines ) {
 				print CONFOUT $line."\n";
 			}
 			close CONFOUT or die colored("There was a problem closing output tmp file: $!", "bold red");
-			system("/bin/cp -f /tmp/tmp.conf $mods_home/$mod_name/etc/fail2ban/fail2ban.conf");
-			chdir("$mod_home");
+			system("/bin/cp -f /tmp/fail2ban.tmp.conf $modsa_home/$mod_name/etc/fail2ban/jail.conf");
+			chdir("$mods_home");
 			system("/bin/ln -snf ../mods-available/fail2ban fail2ban");
 		} else {
 			print colored("Quitting.\n", "bold red");
