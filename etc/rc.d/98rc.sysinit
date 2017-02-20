@@ -1,0 +1,9 @@
+#!/bin/bash
+
+. /etc/bashrc 
+. /etc/rc.d/inc.rc-functions
+
+MOD_HOME="/var/smoothwall/mods/fail2ban"
+
+# start fail2ban
+fail2ban-client -b -c ${MOD_HOME}/etc/fail2ban/ -p /var/run/fail2ban.pid -s /var/run/fail2ban.sock start
