@@ -12,5 +12,5 @@ remove it from your system, remove the following directory after executing this 
 END
 print color("reset");
 print colored("\t/var/smoothwall/mods-available/fail2ban\n", "bold green");
-system("rm -f /var/smoothwall/mods/htop");
-
+system("/bin/rm -f /var/smoothwall/mods/htop");
+system("/bin/rm -f /etc/fail2ban");
