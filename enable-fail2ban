@@ -60,7 +60,11 @@ given ($cwd) {
 			system("/usr/bin/patch /etc/bashrc < _etc_bashrc.patch");
 			chdir("$mods_home");
 			system("/bin/ln -snf ../mods-available/fail2ban fail2ban");
+			# fail2ban insists that stuff be in /etc/fail2ban, even with the alternate config
+			chdir("/etc/");
+			system("/bin/ln -snf $mods_home/fail2ban/etc/fail2ban fail2ban");
 			print colored("The fail2ban mod for Smoothwall Express should now be enabled and configured.\n", "bold cyan");
+			print colored("To use the fail2ban-client command immediately, \"source /etc/bashrc\".  Otherwise, log out, then back in.\n", "bold cyan");
 		} else {
 			print colored("Quitting.\n", "bold red");
 			exit 0;
@@ -96,7 +100,11 @@ given ($cwd) {
 			system("/usr/bin/patch /etc/bashrc < _etc_bashrc.patch");
 			chdir("$mods_home");
 			system("/bin/ln -snf ../mods-available/fail2ban fail2ban");
+			# fail2ban insists that stuff be in /etc/fail2ban, even with the alternate config
+			chdir("/etc/");
+			system("/bin/ln -snf $mods_home/fail2ban/etc/fail2ban fail2ban");
 			print colored("The fail2ban mod for Smoothwall Express should now be enabled and configured.\n", "bold cyan");
+			print colored("To use the fail2ban-client command immediately, \"source /etc/bashrc\".  Otherwise, log out, then back in.\n", "bold cyan");
 		} else {
 			print colored("Quitting.\n", "bold red");
 			exit 0;
@@ -128,7 +136,11 @@ given ($cwd) {
 			system("/usr/bin/patch /etc/bashrc < _etc_bashrc.patch");
 			chdir("$mods_home");
 			system("/bin/ln -snf ../mods-available/fail2ban fail2ban");
+			# fail2ban insists that stuff be in /etc/fail2ban, even with the alternate config
+			chdir("/etc/");
+			system("/bin/ln -snf $mods_home/fail2ban/etc/fail2ban fail2ban");
 			print colored("The fail2ban mod for Smoothwall Express should now be enabled and configured.\n", "bold cyan");
+			print colored("To use the fail2ban-client command immediately, \"source /etc/bashrc\".  Otherwise, log out, then back in.\n", "bold cyan");
 		} else {
 			print colored("Quitting.\n", "bold red");
 			exit 0;
