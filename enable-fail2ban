@@ -39,6 +39,7 @@ given ($cwd) {
 			system("/bin/mkdir -p $modsa_home/$mod_name") unless ( -d "$modsa_home/$mod_name");
 			system("/bin/cp -rf * $modsa_home/$mod_name/");
 			chdir("$modsa_home/$mod_name");
+			print colored("Whitelisting GREEN IP....\n", "bold cyan");
 			my @newlines;
 			open CONFIN, "<etc/fail2ban/jail.conf" or die colored("There was a problem opening jail.conf: $!", "bold red");
 			while (my $line = <CONFIN>) {
@@ -55,8 +56,11 @@ given ($cwd) {
 			}
 			close CONFOUT or die colored("There was a problem closing output tmp file: $!", "bold red");
 			system("/bin/cp -f /tmp/fail2ban.tmp.conf $modsa_home/$mod_name/etc/fail2ban/jail.conf");
+			print colored("Patching /etc/bashrc....\b", "bold cyan");
+			system("/usr/bin/patch /etc/bashrc < _etc_bashrc.patch");
 			chdir("$mods_home");
 			system("/bin/ln -snf ../mods-available/fail2ban fail2ban");
+			print colored("The fail2ban mod for Smoothwall Express should now be enabled and configured.\n", "bold cyan");
 		} else {
 			print colored("Quitting.\n", "bold red");
 			exit 0;
@@ -71,6 +75,7 @@ given ($cwd) {
 			system("/bin/mkdir -p $modsa_home/$mod_name") unless ( -d "$modsa_home/$mod_name");
 			system("/bin/cp -rf * $modsa_home/$mod_name/");
 			chdir("$modsa_home/$mod_name");
+			print colored("Whitelisting GREEN IP....\n", "bold cyan");
 			my @newlines;
 			open CONFIN, "<etc/fail2ban/jail.conf" or die colored("There was a problem opening jail.conf: $!", "bold red");
 			while (my $line = <CONFIN>) {
@@ -87,8 +92,11 @@ given ($cwd) {
 			}
 			close CONFOUT or die colored("There was a problem closing output tmp file: $!", "bold red");
 			system("/bin/cp -f /tmp/fail2ban.tmp.conf $modsa_home/$mod_name/etc/fail2ban/jail.conf");
+			print colored("Patching /etc/bashrc....\b", "bold cyan");
+			system("/usr/bin/patch /etc/bashrc < _etc_bashrc.patch");
 			chdir("$mods_home");
 			system("/bin/ln -snf ../mods-available/fail2ban fail2ban");
+			print colored("The fail2ban mod for Smoothwall Express should now be enabled and configured.\n", "bold cyan");
 		} else {
 			print colored("Quitting.\n", "bold red");
 			exit 0;
@@ -99,6 +107,7 @@ given ($cwd) {
 		my $ans = readline();
 		chomp($ans);
 		if ($ans =~ /^[Yy](?:es)?/) {
+			print colored("Whitelisting GREEN IP....\n", "bold cyan");
 			my @newlines;
 			open CONFIN, "<etc/fail2ban/jail.conf" or die colored("There was a problem opening jail.conf: $!", "bold red");
 			while (my $line = <CONFIN>) {
@@ -115,8 +124,11 @@ given ($cwd) {
 			}
 			close CONFOUT or die colored("There was a problem closing output tmp file: $!", "bold red");
 			system("/bin/cp -f /tmp/fail2ban.tmp.conf $modsa_home/$mod_name/etc/fail2ban/jail.conf");
+			print colored("Patching /etc/bashrc....\b", "bold cyan");
+			system("/usr/bin/patch /etc/bashrc < _etc_bashrc.patch");
 			chdir("$mods_home");
 			system("/bin/ln -snf ../mods-available/fail2ban fail2ban");
+			print colored("The fail2ban mod for Smoothwall Express should now be enabled and configured.\n", "bold cyan");
 		} else {
 			print colored("Quitting.\n", "bold red");
 			exit 0;
