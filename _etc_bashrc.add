@@ -1,0 +1,15 @@
+
+
+### Start modification by swe-fail2ban
+# PYTHONPATH
+PYTHONPATH=/usr/lib/python2.7
+shopt -s nullglob
+for i in /var/smoothwall/mods/*/lib/python2.7; do
+	[[ ":$PYTHONPATH:" == *":${i/lib\/python2.7\//lib/python2.7}:" ]] || PYTHONPATH=${PYTHONPATH}:$i
+done
+shopt -u nullglob
+# PYTHONPATH needs to be exported to be seen by python
+export PYTHONPATH
+### end nodificiation by swe-fail2ban
+
+
